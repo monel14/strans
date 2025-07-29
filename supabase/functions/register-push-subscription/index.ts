@@ -46,13 +46,8 @@ serve(async (req) => {
       .upsert({
         user_id: user.id,
         endpoint: subscription.endpoint,
-        subscription: JSON.stringify(subscription),
-        user_agent: userAgent || null,
-        active: true,
-        created_at: new Date().toISOString(),
+        subscription: subscription,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,endpoint'
       })
 
     if (error) {
