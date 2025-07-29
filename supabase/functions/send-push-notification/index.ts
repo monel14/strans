@@ -33,11 +33,14 @@ serve(async (req) => {
 
     const { userId, payload } = await req.json()
 
+    // Utiliser l'ID de l'utilisateur authentifié si userId n'est pas fourni ou invalide
+    const targetUserId = (userId && userId !== 'current-user') ? userId : user.id
+
     // Récupérer les abonnements push de l'utilisateur
     const { data: subscriptions, error: subError } = await supabaseClient
       .from('push_subscriptions')
       .select('subscription')
-      .eq('user_id', userId)
+      .eq('user_id', targetUserId)
 
     if (subError) {
       throw subError
@@ -54,7 +57,7 @@ serve(async (req) => {
     const { error: notifError } = await supabaseClient
       .from('notifications')
       .insert({
-        user_id: userId,
+        user_id: targetUserId,
         icon: payload.icon || '🔔',
         text: `${payload.title}: ${payload.body}`,
         type: payload.type || 'user_alert',

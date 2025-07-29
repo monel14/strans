@@ -109,9 +109,16 @@ export const PushNotificationSettings: React.FC<PushNotificationSettingsProps> =
         return;
       }
 
+      // Récupérer l'utilisateur actuel
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('❌ Utilisateur non authentifié');
+        return;
+      }
+
       // Test avec template de transaction
       const success = await pushNotificationManager.sendNotification(
-        'current-user', // Remplacer par l'ID utilisateur réel
+        user.id,
         {
           title: '💰 Test Transaction',
           body: 'Transaction de test de 1,500€ créée',
