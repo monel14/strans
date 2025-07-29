@@ -53,18 +53,48 @@ serve(async (req) => {
       )
     }
 
+    // Créer un tag unique pour éviter les doublons
+    const notificationTag = payload.tag || `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const notificationText = `${payload.title}: ${payload.body}`
+
+    // Vérifier s'il y a déjà une notification similaire récente (dernières 5 minutes)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+    const { data: existingNotifs } = await supabaseClient
+      .from('notifications')
+      .select('id')
+      .eq('user_id', targetUserId)
+      .eq('text', notificationText)
+      .gte('created_at', fiveMinutesAgo)
+      .limit(1)
+
+    if (existingNotifs && existingNotifs.length > 0) {
+      return new Response(
+        JSON.stringify({ 
+          message: 'Notification en double évitée',
+          duplicate_avoided: true
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
     // Enregistrer la notification dans la base de données
     const { error: notifError } = await supabaseClient
       .from('notifications')
       .insert({
         user_id: targetUserId,
         icon: payload.icon || '🔔',
-        text: `${payload.title}: ${payload.body}`,
+        text: notificationText,
         type: payload.type || 'user_alert',
         template: payload.template || null,
         priority: payload.priority || 'normal',
         category: payload.category || 'general',
-        metadata: payload.data || {}
+        metadata: {
+          ...payload.data || {},
+          notificationTag: notificationTag
+        }
       })
 
     if (notifError) {

@@ -92,10 +92,11 @@ export const PushNotificationSettings: React.FC<PushNotificationSettingsProps> =
 
   const testNotification = () => {
     if ('Notification' in window && Notification.permission === 'granted') {
+      const timestamp = Date.now();
       new Notification('Test SecureTrans', {
         body: 'Ceci est une notification de test',
         icon: '/vite.svg',
-        tag: 'test'
+        tag: `test-simple-${timestamp}`
       });
     }
   };
