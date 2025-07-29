@@ -47,12 +47,19 @@ export class PushNotificationManager {
     }
 
     try {
-      // Enregistrer le service worker
-      this.registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      });
-
-      console.log('✅ Service Worker enregistré:', this.registration);
+      // Vérifier si le service worker est déjà enregistré
+      const existingRegistration = await navigator.serviceWorker.getRegistration('/');
+      
+      if (existingRegistration) {
+        console.log('✅ Service Worker déjà enregistré:', existingRegistration);
+        this.registration = existingRegistration;
+      } else {
+        // Enregistrer le service worker seulement s'il n'existe pas
+        this.registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/'
+        });
+        console.log('✅ Service Worker nouvellement enregistré:', this.registration);
+      }
 
       // Attendre que le service worker soit prêt
       await navigator.serviceWorker.ready;

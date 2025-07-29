@@ -68,6 +68,25 @@ self.addEventListener('push', (event) => {
     }
   }
 
+  // Éviter les notifications en double avec un tag unique
+  const notificationTag = data.tag || `notification-${data.id || Date.now()}`;
+  
+  // Vérifier si une notification avec ce tag existe déjà
+  event.waitUntil(
+    self.registration.getNotifications({ tag: notificationTag }).then((existingNotifications) => {
+      if (existingNotifications.length > 0) {
+        console.log('⚠️ Notification en double évitée:', notificationTag);
+        return Promise.resolve();
+      }
+      
+      return showNotificationWithTemplate(data, notificationTag);
+    })
+  );
+});
+
+// Fonction pour afficher la notification avec template
+function showNotificationWithTemplate(data, notificationTag) {
+
   // Templates de notifications prédéfinis
   const templates = {
     transaction_created: {
@@ -106,7 +125,7 @@ self.addEventListener('push', (event) => {
     body: data.body || 'Nouvelle notification',
     icon: template.icon ? `/icons/${template.icon}.png` : (data.icon || '/vite.svg'),
     badge: '/vite.svg',
-    tag: data.tag || 'default',
+    tag: notificationTag,
     data: {
       ...data.data,
       notificationId: data.id,
@@ -134,10 +153,8 @@ self.addEventListener('push', (event) => {
     sticky: data.sticky || false
   };
 
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'SecureTrans', options)
-  );
-});
+  return self.registration.showNotification(data.title || 'SecureTrans', options);
+}
 
 // Gestion des clics sur les notifications
 self.addEventListener('notificationclick', (event) => {
