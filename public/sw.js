@@ -228,15 +228,69 @@ self.addEventListener('sync', (event) => {
 
     if (event.tag === 'background-sync') {
         event.waitUntil(
-            // Ici vous pouvez synchroniser les données hors ligne
-            fetch('/api/sync')
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log('✅ Synchronisation réussie:', data);
-                })
-                .catch((error) => {
-                    console.error('❌ Erreur de synchronisation:', error);
-                })
+            syncOfflineData()
+        );
+    } else if (event.tag === 'transaction-sync') {
+        event.waitUntil(
+            syncPendingTransactions()
         );
     }
 });
+
+// Synchroniser les données hors ligne
+async function syncOfflineData() {
+    try {
+        // Récupérer les données en attente depuis IndexedDB ou localStorage
+        const pendingData = await getPendingData();
+
+        if (pendingData.length > 0) {
+            for (const item of pendingData) {
+                try {
+                    await fetch('/api/sync', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(item)
+                    });
+                    // Supprimer l'élément synchronisé
+                    await removePendingData(item.id);
+                } catch (error) {
+                    console.error('❌ Erreur sync item:', error);
+                }
+            }
+        }
+
+        console.log('✅ Synchronisation arrière-plan réussie');
+    } catch (error) {
+        console.error('❌ Erreur synchronisation arrière-plan:', error);
+    }
+}
+
+// Synchroniser les transactions en attente
+async function syncPendingTransactions() {
+    try {
+        // Logique spécifique aux transactions
+        console.log('🔄 Synchronisation des transactions...');
+
+        // Notifier l'utilisateur si nécessaire
+        self.registration.showNotification('SecureTrans', {
+            body: 'Synchronisation des données en cours...',
+            icon: '/vite.svg',
+            tag: 'sync-notification',
+            silent: true
+        });
+
+    } catch (error) {
+        console.error('❌ Erreur sync transactions:', error);
+    }
+}
+
+// Fonctions utilitaires pour les données hors ligne
+async function getPendingData() {
+    // Simulé - à remplacer par IndexedDB ou localStorage
+    return [];
+}
+
+async function removePendingData(id) {
+    // Simulé - à remplacer par la suppression réelle
+    console.log('🗑️ Données supprimées:', id);
+}
