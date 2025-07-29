@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SecureTrans - Plateforme de Transfert</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="./index.css" />
+  <script>
+    // Définition des variables d'environnement pour Supabase
+    window.process = {
+      env: {
+        SUPABASE_URL: 'https://dkocbwwzvojwmejfrskk.supabase.co', // URL de votre projet Supabase
+        SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRrb2Nid3d6dm9qd21lamZyc2trIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4OTY1MDYsImV4cCI6MjA2NzQ3MjUwNn0.gVcgFreKmBzdk_JKNOdMOpJzJpxJXaldvS2_w38Uqmg' // Clé "anon" Supabase
+      }
+    };
+
+    // Fonction pour vérifier si Supabase est accessible
+    async function checkSupabaseConnection() {
+      try {
+        const response = await fetch(window.process.env.SUPABASE_URL + '/auth/v1/health', {
+          headers: {
+            'apikey': window.process.env.SUPABASE_ANON_KEY
+          }
+        });
+        if (!response.ok) {
+          console.error('Erreur de connexion à Supabase:', await response.text());
+        } else {
+          console.log('Connexion à Supabase réussie');
+        }
+      } catch (err) {
+        console.error('Erreur lors de la vérification de la connexion Supabase:', err);
+      }
+    }
+
+    // Vérifier la connexion au chargement
+    window.addEventListener('DOMContentLoaded', checkSupabaseConnection);
+  </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.45.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "vite": "https://esm.sh/vite@^7.0.4",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^4.6.0",
+    "process": "https://esm.sh/process@^0.11.10",
+    "chart.js": "https://esm.sh/chart.js@^4.4.3",
+    "react-chartjs-2": "https://esm.sh/react-chartjs-2@^5.2.0"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>

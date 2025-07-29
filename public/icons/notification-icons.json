@@ -1,0 +1,50 @@
+{
+  "transaction": {
+    "created": "💰",
+    "pending": "⏳",
+    "approved": "✅",
+    "rejected": "❌",
+    "completed": "🎉"
+  },
+  "security": {
+    "alert": "🔒",
+    "warning": "⚠️",
+    "breach": "🚨",
+    "success": "🛡️"
+  },
+  "system": {
+    "update": "🔄",
+    "maintenance": "🔧",
+    "error": "❌",
+    "info": "ℹ️"
+  },
+  "communication": {
+    "message": "💬",
+    "email": "📧",
+    "call": "📞",
+    "meeting": "🤝"
+  },
+  "validation": {
+    "required": "⚠️",
+    "approved": "✅",
+    "rejected": "❌",
+    "pending": "⏳"
+  },
+  "actions": {
+    "view": "👁️",
+    "edit": "✏️",
+    "delete": "🗑️",
+    "approve": "✅",
+    "reject": "❌",
+    "reply": "↩️",
+    "forward": "➡️",
+    "download": "⬇️",
+    "upload": "⬆️",
+    "share": "📤",
+    "print": "🖨️",
+    "save": "💾",
+    "cancel": "❌",
+    "confirm": "✅",
+    "dismiss": "👋"
+  }
+}
