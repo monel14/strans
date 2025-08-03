@@ -29,9 +29,19 @@ const TransactionListItem: React.FC<{ transaction: Transaction, opType?: Operati
     let details = '';
     if (transaction.data && typeof transaction.data === 'object' && transaction.data !== null && !Array.isArray(transaction.data)) {
         const dataObj = transaction.data as Record<string, any>;
-        if (opType?.id === 'op_transfert_nat') details = `vers ${dataObj.nom_beneficiaire}`;
-        else if (opType?.id === 'op_paiement_sde') details = `Facture ${dataObj.num_facture_sde}`;
-        else if (opType?.id === 'op_reabo_canal') details = `Décodeur ${dataObj.num_decodeur_canal}`;
+        if (opType?.id === 'op_transfert_nat') {
+            // Support des anciens et nouveaux formats de données
+            const beneficiaire = dataObj.nom_beneficiaire || dataObj.destinataire;
+            const lieu = dataObj.lieu;
+            if (beneficiaire) {
+                details = `vers ${beneficiaire}`;
+            } else if (lieu) {
+                details = `vers ${lieu}`;
+            }
+        }
+        else if (opType?.id === 'op_paiement_sde') details = `Facture ${dataObj.num_facture_sde || dataObj.numero_facture || ''}`;
+        else if (opType?.id === 'op_reabo_canal') details = `Décodeur ${dataObj.num_decodeur_canal || dataObj.numero_decodeur || ''}`;
+        else if (opType?.id === 'op_paiement_woyofal') details = `Client ${dataObj.nom_client || dataObj.client || ''}`;
     }
 
     const getIcon = () => {

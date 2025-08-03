@@ -67,10 +67,30 @@ export const useOperationTypes = () => {
             console.warn("Type d'opération introuvable.");
             return;
         }
+        
         const statuses = ['active', 'inactive', 'archived'];
+        const statusLabels = {
+            'active': '🟢 Actif (visible pour les agents)',
+            'inactive': '🟡 Inactif (masqué temporairement)', 
+            'archived': '⚫ Archivé (fin de vie)'
+        };
+        
         const currentIndex = statuses.indexOf(opToToggle.status as string);
         const nextIndex = (currentIndex + 1) % statuses.length;
         const newStatus = statuses[nextIndex];
+        
+        // Confirmation pour les changements critiques
+        if (opToToggle.status === 'active' && newStatus === 'inactive') {
+            if (!window.confirm(`Désactiver "${opToToggle.name}" ?\n\nCe type d'opération ne sera plus visible pour les agents.`)) {
+                return;
+            }
+        }
+        
+        if (opToToggle.status === 'inactive' && newStatus === 'archived') {
+            if (!window.confirm(`Archiver "${opToToggle.name}" ?\n\nCe type d'opération sera marqué comme obsolète.`)) {
+                return;
+            }
+        }
 
         const updatePayload: Database['public']['Tables']['operation_types']['Update'] = { status: newStatus };
         const { error } = await supabase
@@ -81,7 +101,7 @@ export const useOperationTypes = () => {
         if (error) {
             handleSupabaseError(error, "Changement de statut du type d'opération");
         } else {
-            console.log(`Statut changé à : ${newStatus}`);
+            console.log(`Statut changé à : ${newStatus} (${statusLabels[newStatus as keyof typeof statusLabels]})`);
             fetchOpTypes(); // Refetch
         }
     };

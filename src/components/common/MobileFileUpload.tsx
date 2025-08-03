@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 
 interface MobileFileUploadProps {
     onFileSelect: (file: File | null) => void;
@@ -19,55 +19,154 @@ export const MobileFileUpload: React.FC<MobileFileUploadProps> = ({
     className = "",
     disabled = false
 }) => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    // Détecter si on est sur mobile - DOIT ÊTRE EN PREMIER
+    const isMobile = typeof navigator !== 'undefined' && 
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [restoredPreview, setRestoredPreview] = useState<string | null>(null);
+    const [clickAttempts, setClickAttempts] = useState(0);
+    const [showFallback, setShowFallback] = useState(false);
 
-    // Utiliser useCallback pour éviter les re-renders
+    // Restaurer le fichier depuis localStorage après remount
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem("MOBILE_MODAL_LAST_FILE");
+            if (stored && !currentFile && !previewUrl) {
+                const parsed = JSON.parse(stored);
+                if (parsed?.dataUrl) {
+                    console.log('📁 Restauration fichier depuis localStorage:', parsed.name);
+                    setRestoredPreview(parsed.dataUrl);
+                }
+            }
+        } catch (e) {
+            console.error('Erreur restauration localStorage:', e);
+        }
+    }, [currentFile, previewUrl]);
+
+    // Gestion du changement de fichier - VERSION ROBUSTE
     const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
+        console.log("📁 handleFileChange déclenché, files:", e.target.files?.length || 0);
+        
+        const file = e.target.files?.[0];
+        if (!file) {
+            console.log("📁 Aucun fichier sélectionné");
+            onFileSelect(null);
+            return;
+        }
 
+        console.log("📁 Fichier sélectionné:", file.name, file.size, file.type);
+        
+        // Debug mobile
+        if (isMobile) {
+            console.log("📁 MOBILE - Traitement fichier:", {
+                name: file.name,
+                size: file.size,
+                type: file.type,
+                lastModified: file.lastModified
+            });
+        }
+        
         setIsProcessing(true);
 
-        setTimeout(() => {
-            const files = e.target.files;
-            if (files && files[0]) {
-                // LOG DEBUG MOBILE
-                // alert('Fichier sélectionné: ' + files[0].name + ' (' + files[0].size + ' octets, type: ' + files[0].type + ')');
-                console.log('📁 Fichier sélectionné:', files[0].name, files[0].size, files[0].type, files[0]);
-                // Sauvegarde DataURL dans localStorage pour le remount mobile
-                const reader = new FileReader();
-                reader.onload = () => {
-                    try {
-                        localStorage.setItem('MOBILE_MODAL_LAST_FILE', JSON.stringify({
-                            name: files[0].name,
-                            type: files[0].type,
-                            dataUrl: reader.result
-                        }));
-                    } catch (e) {}
-                    onFileSelect(files[0]);
-                };
-                reader.readAsDataURL(files[0]);
-            } else {
-                // alert('Aucun fichier sélectionné');
-                onFileSelect(null);
+        const reader = new FileReader();
+        reader.onload = () => {
+            const fileData = {
+                name: file.name,
+                type: file.type,
+                dataUrl: reader.result,
+            };
+
+            try {
+                // Stockage pour mobile (persistence entre remounts)
+                localStorage.setItem("MOBILE_MODAL_LAST_FILE", JSON.stringify(fileData));
+                setRestoredPreview(null); // Clear restored preview
+            } catch (e) {
+                console.error('Erreur sauvegarde localStorage:', e);
             }
+
+            // Réinitialiser les tentatives et cacher le fallback
+            setClickAttempts(0);
+            setShowFallback(false);
+
+            // Action principale
+            onFileSelect(file);
             setIsProcessing(false);
-        }, 100);
+        };
+        
+        reader.onerror = () => {
+            console.error('Erreur lecture fichier');
+            setIsProcessing(false);
+        };
+        
+        reader.readAsDataURL(file);
     }, [onFileSelect]);
 
+    // Click handler ULTRA-ROBUSTE avec détection d'échec
     const handleClick = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         
         if (disabled || isProcessing) return;
         
-        // Sur mobile, ajouter un petit délai pour éviter les conflits
-        setTimeout(() => {
-            fileInputRef.current?.click();
-        }, 50);
-    }, [disabled, isProcessing]);
+        const newAttempts = clickAttempts + 1;
+        setClickAttempts(newAttempts);
+        
+        console.log(`📁 Tentative ${newAttempts} de déclenchement sélection fichier`);
+        
+        // Après 3 tentatives échouées, montrer le fallback
+        if (newAttempts >= 3 && isMobile) {
+            console.log('📁 Activation du mode fallback après 3 tentatives');
+            setShowFallback(true);
+            return;
+        }
+        
+        // Approche multiple pour mobile
+        const triggerFileInput = () => {
+            if (fileInputRef.current) {
+                try {
+                    // Méthode 1: Click direct
+                    fileInputRef.current.click();
+                    console.log('📁 Click direct réussi');
+                    
+                    // Détecter si le click a fonctionné (timeout pour vérifier)
+                    setTimeout(() => {
+                        if (!isProcessing && newAttempts >= 2) {
+                            console.log('📁 Click semble avoir échoué, activation fallback');
+                            setShowFallback(true);
+                        }
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('📁 Click direct échoué:', error);
+                    
+                    // Méthode 2: Dispatch event
+                    try {
+                        const event = new MouseEvent('click', {
+                            view: window,
+                            bubbles: true,
+                            cancelable: true,
+                        });
+                        fileInputRef.current.dispatchEvent(event);
+                        console.log('📁 Dispatch event réussi');
+                    } catch (dispatchError) {
+                        console.error('📁 Dispatch event échoué:', dispatchError);
+                        if (isMobile) setShowFallback(true);
+                    }
+                }
+            } else {
+                console.error('📁 fileInputRef.current est null');
+                if (isMobile) setShowFallback(true);
+            }
+        };
+        
+        // Essayer immédiatement puis avec délai
+        triggerFileInput();
+        setTimeout(triggerFileInput, 50);
+        setTimeout(triggerFileInput, 150);
+    }, [disabled, isProcessing, clickAttempts, isMobile]);
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -106,7 +205,14 @@ export const MobileFileUpload: React.FC<MobileFileUploadProps> = ({
         
         if (disabled) return;
         
+        // Nettoyer localStorage et état
+        try {
+            localStorage.removeItem('MOBILE_MODAL_LAST_FILE');
+        } catch (e) {}
+        
+        setRestoredPreview(null);
         onFileSelect(null);
+        
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -120,29 +226,48 @@ export const MobileFileUpload: React.FC<MobileFileUploadProps> = ({
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
+    // Déterminer l'aperçu à afficher
+    const displayPreview = previewUrl || restoredPreview;
+    const hasFile = currentFile || displayPreview;
+
     return (
         <div className={`relative ${className}`}>
-            {/* Input caché */}
+            {/* Input TOUJOURS présent dans le DOM - VERSION ULTRA-ROBUSTE */}
             <input
                 ref={fileInputRef}
                 type="file"
                 accept={accept}
                 onChange={handleFileChange}
-                className="hidden"
+                style={isMobile ? {
+                    // Sur mobile: input visible mais transparent
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    opacity: 0,
+                    cursor: 'pointer',
+                    zIndex: 10
+                } : { 
+                    // Sur desktop: input caché
+                    position: 'absolute', 
+                    left: '-9999px',
+                    opacity: 0,
+                    pointerEvents: 'none'
+                }}
                 required={required}
                 disabled={disabled}
-                // Empêcher la propagation des événements
-                onClick={(e) => e.stopPropagation()}
+                tabIndex={isMobile ? 0 : -1}
             />
 
-            {/* Zone de drop/click */}
+            {/* Zone de drop/click avec fallback mobile */}
             <div
-                onClick={handleClick}
+                onClick={!isMobile ? handleClick : undefined}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`
-                    border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-200
+                    relative border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-all duration-200
                     ${isDragOver 
                         ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' 
                         : 'border-gray-300 dark:border-gray-600 hover:border-blue-400'
@@ -151,45 +276,14 @@ export const MobileFileUpload: React.FC<MobileFileUploadProps> = ({
                     ${isProcessing ? 'opacity-75' : ''}
                 `}
             >
-                {(currentFile || previewUrl || (() => {
-                    try {
-                        const lastFile = localStorage.getItem('MOBILE_MODAL_LAST_FILE');
-                        if (lastFile) {
-                            const parsed = JSON.parse(lastFile);
-                            return !!parsed.dataUrl;
-                        }
-                    } catch (e) {}
-                    return false;
-                })()) ? (
+                {hasFile ? (
                     // Fichier sélectionné, DataURL restaurée, ou DataURL locale
                     <div className="space-y-3">
                         <div className="flex flex-col items-center justify-center space-y-2">
                             {/* Aperçu image si possible */}
-                            {(previewUrl ||
-                                (() => {
-                                    try {
-                                        const lastFile = localStorage.getItem('MOBILE_MODAL_LAST_FILE');
-                                        if (lastFile) {
-                                            const parsed = JSON.parse(lastFile);
-                                            return parsed.dataUrl;
-                                        }
-                                    } catch (e) {}
-                                    return null;
-                                })()
-                            ) && (
+                            {displayPreview && (
                                 <img
-                                    src={previewUrl ||
-                                        (() => {
-                                            try {
-                                                const lastFile = localStorage.getItem('MOBILE_MODAL_LAST_FILE');
-                                                if (lastFile) {
-                                                    const parsed = JSON.parse(lastFile);
-                                                    return parsed.dataUrl;
-                                                }
-                                            } catch (e) {}
-                                            return undefined;
-                                        })()
-                                    }
+                                    src={displayPreview}
                                     alt="Aperçu"
                                     className="max-h-32 max-w-full rounded shadow border"
                                     style={{ objectFit: 'contain' }}
@@ -242,6 +336,39 @@ export const MobileFileUpload: React.FC<MobileFileUploadProps> = ({
                                         <span className="hidden sm:inline">ou glissez-déposez votre fichier ici</span>
                                         <span className="sm:hidden">Images et PDF acceptés</span>
                                     </p>
+                                    
+                                    {/* Bouton fallback pour mobile */}
+                                    {isMobile && (
+                                        <div className="mt-3 space-y-2">
+                                            <button
+                                                type="button"
+                                                onClick={handleClick}
+                                                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                                            >
+                                                📁 Choisir un fichier
+                                            </button>
+                                            
+                                            {showFallback && (
+                                                <div className="text-xs text-orange-600 bg-orange-50 p-2 rounded">
+                                                    ⚠️ Si le bouton ne fonctionne pas, utilisez l'input ci-dessous :
+                                                    <input
+                                                        type="file"
+                                                        accept={accept}
+                                                        onChange={handleFileChange}
+                                                        className="block w-full mt-2 text-xs"
+                                                        disabled={disabled}
+                                                    />
+                                                </div>
+                                            )}
+                                            
+                                            {clickAttempts > 0 && !showFallback && (
+                                                <div className="text-xs text-gray-500">
+                                                    Tentative {clickAttempts}/3...
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
                                     {required && (
                                         <p className="text-xs text-red-500 mt-1">
                                             * Fichier requis

@@ -6,6 +6,7 @@ import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
 import { OperationType, FormField, CommissionConfig, Agent } from '../../types';
 import { SectionLoader } from '../../components/common/Loader';
+import { useOperationTypeValidation } from '../../utils/operationTypeValidation';
 
 interface NewOperationModalProps {
     isOpen: boolean;
@@ -23,6 +24,8 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
     const [availableOpTypes, setAvailableOpTypes] = useState<OperationType[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const { validateBeforeSubmit } = useOperationTypeValidation();
 
     const {
         formData,
@@ -73,7 +76,7 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
 
         fetchOpTypes();
     }, [user.agency_id]);
-    
+
     // Vérifier que le type sélectionné existe toujours après le chargement
     useEffect(() => {
         if (selectedOpTypeId && availableOpTypes.length > 0) {
@@ -106,30 +109,30 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
             if (proofFile || proofFileDataUrl) {
                 isProofValid = true;
             } else {
-                // Fallback localStorage mobile
+                // Fallback localStorage mobile - VERSION ROBUSTE
                 try {
                     const mobileFile = localStorage.getItem('MOBILE_MODAL_LAST_FILE');
                     if (mobileFile) {
                         const parsed = JSON.parse(mobileFile);
-                        isProofValid = !!(parsed && parsed.dataUrl);
+                        isProofValid = !!(parsed && parsed.dataUrl && parsed.name);
                     }
                 } catch (e) {
-                    // Ignore localStorage errors
+                    console.error('Erreur validation localStorage:', e);
                 }
             }
         }
-        
-        const finalValid = allRequiredFieldsFilled && isProofValid;
-        
 
-        
+        const finalValid = allRequiredFieldsFilled && isProofValid;
+
+
+
         setIsFormValid(finalValid);
     }, [selectedOpType, formData, proofFile, proofFileDataUrl, setIsFormValid]);
 
     const handleOpTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
         const opTypeId = e.target.value;
         setSelectedOpTypeId(opTypeId || null);
-        
+
         // Réinitialiser les données du formulaire quand on change de type
         if (opTypeId !== selectedOpTypeId) {
             setFormData({});
@@ -151,7 +154,7 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!isFormValid || !selectedOpType || isSubmitting) {
             return;
         }
@@ -160,7 +163,7 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
 
         // Fallback : convertir la DataURL en Blob si File absent
         let fileToSend: File | null = proofFile;
-        
+
         // MOBILE DEBUG - État initial
         console.log('📁 MOBILE DEBUG - État fichiers:', {
             proofFile: !!proofFile,
@@ -183,31 +186,33 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
                 fileToSend = null;
             }
         }
-        
-        // MOBILE FIX - Fallback localStorage si toujours pas de fichier
+
+        // MOBILE FIX - Fallback localStorage ROBUSTE
         if (!fileToSend) {
             try {
                 const mobileFileData = localStorage.getItem('MOBILE_MODAL_LAST_FILE');
                 if (mobileFileData) {
                     const parsed = JSON.parse(mobileFileData);
-                    if (parsed && parsed.dataUrl) {
+                    if (parsed && parsed.dataUrl && parsed.name) {
                         const arr = parsed.dataUrl.split(',');
-                        const mime = arr[0].match(/:(.*?);/)?.[1] || parsed.type || 'image/png';
-                        const bstr = atob(arr[1]);
-                        let n = bstr.length;
-                        const u8arr = new Uint8Array(n);
-                        while (n--) {
-                            u8arr[n] = bstr.charCodeAt(n);
+                        if (arr.length === 2) {
+                            const mime = arr[0].match(/:(.*?);/)?.[1] || parsed.type || 'image/png';
+                            const bstr = atob(arr[1]);
+                            let n = bstr.length;
+                            const u8arr = new Uint8Array(n);
+                            while (n--) {
+                                u8arr[n] = bstr.charCodeAt(n);
+                            }
+                            fileToSend = new File([u8arr], parsed.name, { type: mime });
+                            console.log('📁 MOBILE SUCCESS - Fichier récupéré depuis localStorage:', fileToSend.name, fileToSend.size);
                         }
-                        fileToSend = new File([u8arr], parsed.name || 'preuve_mobile.png', { type: mime });
-                        console.log('📁 MOBILE SUCCESS - Fichier récupéré depuis localStorage:', fileToSend.name, fileToSend.size);
                     }
                 }
             } catch (e) {
                 console.error('Erreur récupération fichier mobile localStorage:', e);
             }
         }
-        
+
         console.log('📁 MOBILE DEBUG - Fichier final à envoyer:', fileToSend ? {
             name: fileToSend.name,
             size: fileToSend.size,
@@ -220,7 +225,13 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
                 formData,
                 proofFile: fileToSend
             });
+
+            // Nettoyage complet après succès
             clearFormState(); // Clear sessionStorage on successful submission
+            try {
+                localStorage.removeItem('MOBILE_MODAL_LAST_FILE');
+            } catch (e) { }
+
             onClose();
         } catch (error) {
             console.error('Erreur lors de la soumission:', error);
@@ -238,8 +249,21 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
 
     const { opFields, amountInput, currentAmount, balanceAfter } = useMemo(() => {
         const fields = selectedOpType?.fields || [];
-        const amountField = fields.find((f: FormField) => f.name.includes('montant'));
-        const amount = amountField ? Number(formData[amountField.name]) || 0 : 0;
+
+        // Chercher un champ de montant direct
+        let amountField = fields.find((f: FormField) => f.name.includes('montant'));
+        let amount = amountField ? Number(formData[amountField.name]) || 0 : 0;
+
+        // Si pas de champ montant direct, chercher dans les champs avec pricing
+        if (amount === 0) {
+            const pricingField = fields.find((f: any) => f.pricing && formData[f.name]);
+            if (pricingField && formData[pricingField.name]) {
+                const selectedOption = formData[pricingField.name];
+                amount = (pricingField as any).pricing?.[selectedOption] || 0;
+                amountField = pricingField as FormField;
+            }
+        }
+
         const balance = selectedOpType?.impacts_balance ? (user.solde ?? 0) - amount : (user.solde ?? 0);
 
         return {
@@ -289,14 +313,14 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
                                 <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
                                     Informations de l'opération
                                 </h3>
-                                
+
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {opFields.map((field: FormField) => (
                                         <div key={field.name} className={field.name.includes('montant') ? 'sm:col-span-2' : ''}>
                                             <label htmlFor={field.name} className="form-label">
                                                 {field.label} {field.required && '*'}
                                             </label>
-                                            
+
                                             {field.type === 'select' ? (
                                                 <select
                                                     id={field.name}
@@ -395,11 +419,10 @@ export const NewOperationModal: React.FC<NewOperationModalProps> = ({
                                     e.preventDefault();
                                     await handleSubmit(e as any);
                                 }}
-                                className={`w-full sm:w-auto flex-1 px-6 py-3 rounded-lg flex items-center justify-center order-1 sm:order-2 transition-all ${
-                                    isFormValid && !isSubmitting && (!selectedOpType?.impacts_balance || balanceAfter >= 0)
-                                        ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
-                                        : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-50'
-                                }`}
+                                className={`w-full sm:w-auto flex-1 px-6 py-3 rounded-lg flex items-center justify-center order-1 sm:order-2 transition-all ${isFormValid && !isSubmitting && (!selectedOpType?.impacts_balance || balanceAfter >= 0)
+                                    ? 'bg-green-600 text-white hover:bg-green-700 cursor-pointer'
+                                    : 'bg-gray-400 text-gray-200 cursor-not-allowed opacity-50'
+                                    }`}
                             >
                                 {isSubmitting ? (
                                     <>

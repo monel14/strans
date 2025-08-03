@@ -17,29 +17,57 @@ export const useAgentActions = (
     const handleSaveNewOperation = useCallback(async (opData: { opTypeId: string, formData: Record<string, any>, proofFile: File | null }) => {
         if (!currentUser) return;
         
+        console.log('🚀 DÉBUT création transaction:', {
+            opTypeId: opData.opTypeId,
+            formData: opData.formData,
+            hasProofFile: !!opData.proofFile,
+            proofFileName: opData.proofFile?.name,
+            proofFileSize: opData.proofFile?.size,
+            agentId: currentUser.id
+        });
+        
         let proofUrl: string | null = null;
         if (opData.proofFile) {
+            console.log('📁 Validation du fichier...');
             const validation = validateFile(opData.proofFile);
             if (!validation.valid) {
+                console.error('❌ Validation fichier échouée:', validation.error);
                 handleSupabaseError({ message: validation.error } as any, "Validation du fichier");
-                throw new Error(validation.error); // Throw to stop execution and show error in modal
+                throw new Error(validation.error);
             }
+            console.log('✅ Fichier validé');
 
+            console.log('📤 Upload du fichier...');
             const uploadResult = await uploadFile('proofs', opData.proofFile, currentUser.id);
             if (!uploadResult.success) {
+                console.error('❌ Upload fichier échoué:', uploadResult.error);
                 handleSupabaseError({ message: uploadResult.error } as any, "Téléversement de la preuve");
-                throw new Error(uploadResult.error); // Throw to stop execution
+                throw new Error(uploadResult.error);
             }
             proofUrl = uploadResult.url!;
+            console.log('✅ Fichier uploadé:', proofUrl);
         }
 
-        const { error } = await supabase.rpc('create_secure_transaction', { p_agent_id: currentUser.id, p_op_type_id: opData.opTypeId, p_data: opData.formData, p_proof_url: proofUrl });
+        console.log('🔄 Appel RPC create_secure_transaction avec:', {
+            p_agent_id: currentUser.id,
+            p_op_type_id: opData.opTypeId,
+            p_data: opData.formData,
+            p_proof_url: proofUrl
+        });
+
+        const { error } = await supabase.rpc('create_secure_transaction', { 
+            p_agent_id: currentUser.id, 
+            p_op_type_id: opData.opTypeId, 
+            p_data: opData.formData, 
+            p_proof_url: proofUrl 
+        });
         
         if (error) {
+            console.error('❌ Erreur RPC create_secure_transaction:', error);
             handleSupabaseError(error, "Création d'une nouvelle transaction");
-            throw error; // Propagate error
+            throw error;
         } else {
-            console.log('Transaction soumise !');
+            console.log('✅ Transaction créée avec succès !');
             setNewOperationModalOpen(false);
             onActionSuccess();
         }

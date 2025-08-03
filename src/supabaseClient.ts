@@ -9,10 +9,10 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || (window as any
 
 if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('VOTRE_URL_SUPABASE') || supabaseAnonKey.includes('VOTRE_CLE_ANON_SUPABASE')) {
     const errorMsg = "Erreur: Clés Supabase non configurées.\n\n" +
-                     "Pour le développement local: Configurez les variables dans le fichier `index.html`\n" +
-                     "Pour Vercel: Configurez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans les variables d'environnement\n\n" +
-                     "Vous trouverez ces clés dans les paramètres de votre projet sur supabase.com > Project Settings > API.";
-    
+        "Pour le développement local: Configurez les variables dans le fichier `index.html`\n" +
+        "Pour Vercel: Configurez VITE_SUPABASE_URL et VITE_SUPABASE_ANON_KEY dans les variables d'environnement\n\n" +
+        "Vous trouverez ces clés dans les paramètres de votre projet sur supabase.com > Project Settings > API.";
+
     // Display a more user-friendly message on the page itself
     const root = document.getElementById('root');
     if (root) {
@@ -25,7 +25,7 @@ if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('VOTRE_URL_SUPABASE
             </div>
         </div>`;
     }
-    
+
     throw new Error(errorMsg);
 }
 

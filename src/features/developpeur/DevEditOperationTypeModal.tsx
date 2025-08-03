@@ -77,14 +77,31 @@ export const DevEditOperationTypeModal: React.FC<DevEditOperationTypeModalProps>
             if (!prevData || !Array.isArray(prevData.fields)) return null;
             
             const newFields = [...prevData.fields];
-            const fieldToUpdate = { ...newFields[index] };
+            const fieldToUpdate = { ...newFields[index] } as any;
 
             if (name === 'options') {
-                fieldToUpdate.options = value.split(',');
+                fieldToUpdate.options = value.split(',').map(opt => opt.trim()).filter(opt => opt);
+            } else if (name === 'hasPricing') {
+                const checked = (e.target as HTMLInputElement).checked;
+                if (checked) {
+                    fieldToUpdate.pricing = {};
+                } else {
+                    delete fieldToUpdate.pricing;
+                }
+            } else if (name === 'pricingConfig') {
+                // Parse pricing config: "Option1:1000,Option2:2000"
+                const pricingObj: Record<string, number> = {};
+                value.split(',').forEach(pair => {
+                    const [key, price] = pair.split(':');
+                    if (key && price && !isNaN(Number(price))) {
+                        pricingObj[key.trim()] = Number(price);
+                    }
+                });
+                fieldToUpdate.pricing = pricingObj;
             } else if (type === 'checkbox') {
-                (fieldToUpdate as any)[name as 'required' | 'obsolete'] = (e.target as HTMLInputElement).checked;
+                fieldToUpdate[name as 'required' | 'obsolete'] = (e.target as HTMLInputElement).checked;
             } else {
-                (fieldToUpdate as any)[name] = value;
+                fieldToUpdate[name] = value;
             }
             
             newFields[index] = fieldToUpdate;
@@ -198,16 +215,56 @@ export const DevEditOperationTypeModal: React.FC<DevEditOperationTypeModalProps>
                     </div>}
                     {activeTab === 'fields' && <div>
                         <div id="devOpTypeFieldsContainer" className="space-y-3 max-h-96 overflow-y-auto p-2 border rounded-md">
-                            {currentFields.map((field, index) => <div key={index} className="p-3 border rounded-md bg-gray-50 grid grid-cols-1 md:grid-cols-7 gap-2 items-end">
-                                <div className="md:col-span-2"><label className="form-label text-xs">Libellé</label><input type="text" name="label" value={field.label} onChange={(e) => handleFieldChange(index, e)} className="form-input form-input-sm"/></div>
-                                <div><label className="form-label text-xs">Nom Tech.</label><input type="text" name="name" value={field.name} onChange={(e) => handleFieldChange(index, e)} className="form-input form-input-sm"/></div>
-                                <div><label className="form-label text-xs">Type</label><select name="type" value={field.type} onChange={(e) => handleFieldChange(index, e)} className="form-select form-select-sm"><option value="text">Texte</option><option value="number">Nombre</option><option value="select">Liste</option></select></div>
-                                <div><label className="form-label text-xs">Options</label><input type="text" name="options" value={field.options?.join(',') || ''} onChange={(e) => handleFieldChange(index, e)} className="form-input form-input-sm" disabled={field.type !== 'select'}/></div>
-                                <div className="flex items-center space-x-2 pt-4"><input type="checkbox" name="required" checked={field.required} onChange={(e) => handleFieldChange(index, e)}/><label className="text-xs">Requis</label><input type="checkbox" name="obsolete" checked={field.obsolete} onChange={(e) => handleFieldChange(index, e)}/><label className="text-xs">Obsolete</label></div>
-                                <button type="button" className="btn btn-danger btn-xs" onClick={() => handleRemoveField(index)}><i className="fas fa-trash"></i></button>
+                            {currentFields.map((field, index) => <div key={index} className="p-3 border rounded-md bg-gray-50 space-y-3">
+                                {/* Ligne 1: Informations de base */}
+                                <div className="grid grid-cols-1 md:grid-cols-6 gap-2 items-end">
+                                    <div className="md:col-span-2"><label className="form-label text-xs">Libellé</label><input type="text" name="label" value={field.label} onChange={(e) => handleFieldChange(index, e)} className="form-input form-input-sm"/></div>
+                                    <div><label className="form-label text-xs">Nom Tech.</label><input type="text" name="name" value={field.name} onChange={(e) => handleFieldChange(index, e)} className="form-input form-input-sm"/></div>
+                                    <div><label className="form-label text-xs">Type</label><select name="type" value={field.type} onChange={(e) => handleFieldChange(index, e)} className="form-select form-select-sm"><option value="text">Texte</option><option value="number">Nombre</option><option value="email">Email</option><option value="tel">Téléphone</option><option value="select">Liste</option></select></div>
+                                    <div className="flex items-center space-x-2 pt-4"><input type="checkbox" name="required" checked={field.required} onChange={(e) => handleFieldChange(index, e)}/><label className="text-xs">Requis</label><input type="checkbox" name="obsolete" checked={field.obsolete} onChange={(e) => handleFieldChange(index, e)}/><label className="text-xs">Obsolète</label></div>
+                                    <button type="button" className="btn btn-danger btn-xs" onClick={() => handleRemoveField(index)}><i className="fas fa-trash"></i></button>
+                                </div>
+                                
+                                {/* Ligne 2: Options et pricing (si select) */}
+                                {field.type === 'select' && (
+                                    <div className="border-t pt-3 space-y-2">
+                                        <div><label className="form-label text-xs">Options (séparées par des virgules)</label><input type="text" name="options" value={field.options?.join(',') || ''} onChange={(e) => handleFieldChange(index, e)} className="form-input form-input-sm" placeholder="Option 1, Option 2, Option 3"/></div>
+                                        
+                                        <div className="flex items-center space-x-2">
+                                            <input type="checkbox" name="hasPricing" checked={!!(field as any).pricing} onChange={(e) => handleFieldChange(index, e)} className="h-4 w-4"/>
+                                            <label className="text-xs font-medium">Ce champ détermine le prix de l'opération</label>
+                                        </div>
+                                        
+                                        {(field as any).pricing && (
+                                            <div className="bg-blue-50 p-3 rounded border">
+                                                <label className="form-label text-xs">Configuration des prix (Format: "Option 1:1000,Option 2:2000")</label>
+                                                <input 
+                                                    type="text" 
+                                                    name="pricingConfig" 
+                                                    value={Object.entries((field as any).pricing || {}).map(([key, value]) => `${key}:${value}`).join(',')}
+                                                    onChange={(e) => handleFieldChange(index, e)} 
+                                                    className="form-input form-input-sm" 
+                                                    placeholder="Essentiel - 2500 XOF:2500,Standard - 4500 XOF:4500"
+                                                />
+                                                <p className="text-xs text-gray-600 mt-1">💡 Exemple: "Formule Basic:1000,Formule Premium:2500"</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>)}
                         </div>
                         <button type="button" onClick={handleAddField} className="btn btn-sm btn-outline-secondary mt-3"><i className="fas fa-plus mr-1"></i>Ajouter un Champ</button>
+                        
+                        {/* Aide pour le système de pricing */}
+                        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <h4 className="font-semibold text-blue-800 mb-2"><i className="fas fa-info-circle mr-2"></i>Système de Pricing</h4>
+                            <div className="text-sm text-blue-700 space-y-2">
+                                <p><strong>Champs avec pricing :</strong> Permettent de définir des options avec des prix différents (ex: Netflix Basic, Standard, Premium).</p>
+                                <p><strong>Format des options :</strong> "Formule Basic - 1000 XOF, Formule Premium - 2500 XOF"</p>
+                                <p><strong>Format du pricing :</strong> "Formule Basic - 1000 XOF:1000, Formule Premium - 2500 XOF:2500"</p>
+                                <p><strong>⚠️ Important :</strong> Les clés du pricing doivent correspondre exactement aux options.</p>
+                            </div>
+                        </div>
                     </div>}
                     {activeTab === 'commissions' && <div>
                         <div className="mb-4">
