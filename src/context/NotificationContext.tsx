@@ -27,7 +27,6 @@ export interface NotificationTemplate {
     icon?: string;
     color?: string;
     sound?: string;
-    vibration?: number[];
     actions?: NotificationAction[];
 }
 
@@ -85,76 +84,41 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const [pushSubscription, setPushSubscription] = useState<PushSubscription | null>(null);
     const [allNotifications, setAllNotifications] = useState<ExtendedNotification[]>([]);
 
-    // Templates de notifications prédéfinis
+    // Templates de notifications essentiels
     const [templates] = useState<Record<string, NotificationTemplate>>({
-        transaction_created: {
-            id: 'transaction_created',
+        transaction: {
+            id: 'transaction',
             type: 'transaction',
-            title: '💰 Nouvelle Transaction',
-            body: 'Une nouvelle transaction a été créée',
+            title: '💰 Transaction',
+            body: 'Nouvelle transaction',
             icon: '💰',
             color: '#10B981',
             sound: 'default',
-            vibration: [200, 100, 200],
             actions: [
-                { action: 'view', title: 'Voir', icon: '👁️' },
-                { action: 'dismiss', title: 'Ignorer' }
-            ]
-        },
-        transaction_validation: {
-            id: 'transaction_validation',
-            type: 'validation',
-            title: '⚠️ Validation Requise',
-            body: 'Une transaction nécessite votre validation',
-            icon: '⚠️',
-            color: '#F59E0B',
-            sound: 'urgent',
-            vibration: [300, 200, 300, 200, 300],
-            actions: [
-                { action: 'validate', title: 'Valider', icon: '✅' },
-                { action: 'reject', title: 'Rejeter', icon: '❌' },
                 { action: 'view', title: 'Voir' }
             ]
         },
-        security_alert: {
-            id: 'security_alert',
+        security: {
+            id: 'security',
             type: 'security',
-            title: '🔒 Alerte Sécurité',
-            body: 'Activité suspecte détectée',
+            title: '🔒 Sécurité',
+            body: 'Alerte de sécurité',
             icon: '🔒',
             color: '#EF4444',
             sound: 'urgent',
-            vibration: [500, 300, 500, 300, 500],
             actions: [
-                { action: 'secure', title: 'Sécuriser', icon: '🛡️' },
-                { action: 'view', title: 'Détails' }
+                { action: 'view', title: 'Voir' }
             ]
         },
-        system_update: {
-            id: 'system_update',
+        system: {
+            id: 'system',
             type: 'system',
-            title: '🔄 Mise à jour',
-            body: 'Mise à jour système disponible',
+            title: '🔄 Système',
+            body: 'Notification système',
             icon: '🔄',
             color: '#6366F1',
-            sound: 'soft',
-            vibration: [100],
+            sound: 'default',
             actions: [
-                { action: 'update', title: 'Mettre à jour', icon: '⬆️' },
-                { action: 'later', title: 'Plus tard' }
-            ]
-        },
-        message: {
-            id: 'message',
-            type: 'communication',
-            title: '💬 Nouveau Message',
-            body: 'Vous avez reçu un nouveau message',
-            icon: '💬',
-            color: '#3B82F6',
-            sound: 'message',
-            vibration: [200, 100, 200],
-            actions: [
-                { action: 'reply', title: 'Répondre', icon: '↩️' },
                 { action: 'view', title: 'Voir' }
             ]
         }
@@ -299,14 +263,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     link: notification.link,
                     actions: template?.actions
                 },
-                // Vibration pour mobile (si supporté)
-                vibrate: template?.vibration || [200, 100, 200],
                 // Actions personnalisées (si supportées)
-                actions: template?.actions?.map(action => ({
-                    action: action.action,
-                    title: action.title,
-                    icon: action.icon ? `/icons/${action.icon}.png` : undefined
-                }))
+                // TODO: Actions simplifiées
             });
 
             // Événements de la notification
