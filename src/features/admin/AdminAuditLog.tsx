@@ -8,6 +8,7 @@ import { PageComponentProps, AuditLog, User } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Table } from '../../components/common/Table';
 import { formatDate } from '../../utils/formatters';
+import { formatShortId } from '../../utils/idFormatters';
 import { Pagination } from '../../components/common/Pagination';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
@@ -43,7 +44,7 @@ export const AdminAuditLog: React.FC<PageComponentProps> = ({ refreshKey }) => {
 
                 const formattedLogs = logsData.map(log => ({
                     timestamp: log.timestamp,
-                    user: log.user_id ? userMap[log.user_id] || "ID: " + log.user_id.substring(0,8) : "Système",
+                    user: log.user_id ? userMap[log.user_id] || formatShortId(log.user_id, 'profile') : "Système",
                     role: log.user_role || "N/A",
                     action: log.action,
                     entity: log.entity_id || log.entity_type || "Système",

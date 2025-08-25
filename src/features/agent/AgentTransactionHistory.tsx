@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
 import { Table } from '../../components/common/Table';
 import { formatDate, formatAmount } from '../../utils/formatters';
+import { formatShortId } from '../../utils/idFormatters';
 import { getBadgeClass } from '../../utils/uiHelpers';
 import { Pagination } from '../../components/common/Pagination';
 import { supabase } from '../../supabaseClient';
@@ -305,10 +306,10 @@ export const AgentTransactionHistory: React.FC<PageComponentProps> = ({ user, op
                                                             </div>
                                                             <div>
                                                                 <div className="font-medium text-gray-900 dark:text-gray-100">
-                                                                    #{transaction.id.substring(0, 8)}...
+                                                                    {formatShortId(transaction.id, 'transaction')}
                                                                 </div>
                                                                 <div className="text-sm text-gray-500">
-                                                                    ID: {transaction.id.substring(0, 12)}
+                                                                    ID: {formatShortId(transaction.id, 'transaction')}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -380,7 +381,7 @@ export const AgentTransactionHistory: React.FC<PageComponentProps> = ({ user, op
                                                                 {opType?.name || 'Type inconnu'}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
-                                                                #{transaction.id.substring(0, 8)}...
+                                                                {formatShortId(transaction.id, 'transaction')}
                                                             </div>
                                                         </div>
                                                     </div>

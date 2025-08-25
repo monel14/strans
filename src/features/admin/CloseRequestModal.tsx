@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Request } from '../../types';
 import { Modal } from '../../components/common/Modal';
+import { formatShortId } from '../../utils/idFormatters';
 
 interface CloseRequestModalProps {
     isOpen: boolean;
@@ -60,7 +61,7 @@ export const CloseRequestModal: React.FC<CloseRequestModalProps> = ({
     return (
         <Modal
             id="close-request-modal"
-            title={`Fermer la requête ${request.id.substring(0, 8)}...`}
+            title={`Fermer la requête ${formatShortId(request.id, 'request')}`}
             isOpen={isOpen}
             onClose={handleClose}
             size="md:max-w-2xl"

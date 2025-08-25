@@ -6,6 +6,7 @@ import { formatDate } from '../../utils/formatters';
 import { getBadgeClass } from '../../utils/uiHelpers';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
+import { formatShortId } from '../../utils/idFormatters';
 
 interface ProcessRequestModalProps {
     isOpen: boolean;
@@ -47,7 +48,7 @@ export const ProcessRequestModal: React.FC<ProcessRequestModalProps> = ({ isOpen
     return (
         <Modal
             id="process-request-modal"
-            title={`Traitement de la Requête ${request.id.substring(0,8)}...`}
+            title={`Traitement de la Requête ${formatShortId(request.id, 'request')}`}
             isOpen={isOpen}
             onClose={onClose}
             size="md:max-w-4xl"

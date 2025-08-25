@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Request } from '../../types';
 import { Modal } from '../../components/common/Modal';
+import { formatShortId } from '../../utils/idFormatters';
 
 interface ResolveRequestModalProps {
     isOpen: boolean;
@@ -42,7 +43,7 @@ export const ResolveRequestModal: React.FC<ResolveRequestModalProps> = ({
     return (
         <Modal
             id="resolve-request-modal"
-            title={`Résoudre la requête ${request.id.substring(0, 8)}...`}
+            title={`Résoudre la requête ${formatShortId(request.id, 'request')}`}
             isOpen={isOpen}
             onClose={handleClose}
             size="md:max-w-2xl"

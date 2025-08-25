@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
 import { Transaction } from '../../types';
 import { formatAmount } from '../../utils/formatters';
+import { formatShortId } from '../../utils/idFormatters';
 
 interface RejectTransactionModalProps {
     isOpen: boolean;
@@ -37,7 +38,7 @@ export const RejectTransactionModal: React.FC<RejectTransactionModalProps> = ({ 
     return (
         <Modal
             id="reject-transaction-modal"
-            title={`Rejeter la transaction ${transaction.id.substring(0, 8)}...`}
+            title={`Rejeter la transaction ${formatShortId(transaction.id, 'transaction')}`}
             isOpen={isOpen}
             onClose={onClose}
             icon={<i className="fas fa-times-circle text-xl text-red-500"></i>}

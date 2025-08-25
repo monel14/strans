@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNotifications, NotificationTemplate, NotificationAction } from '../../context/NotificationContext';
+import { formatShortId } from '../../utils/idFormatters';
 
 interface NotificationTemplateManagerProps {
   isOpen: boolean;
@@ -351,7 +352,7 @@ export const NotificationTemplateManager: React.FC<NotificationTemplateManagerPr
                     <dl className="space-y-2">
                       <div>
                         <dt className="text-sm font-medium text-gray-500">ID</dt>
-                        <dd className="text-sm text-gray-900">{selectedTemplate.id}</dd>
+                        <dd className="text-sm text-gray-900">{formatShortId(selectedTemplate.id, 'notification')}</dd>
                       </div>
                       <div>
                         <dt className="text-sm font-medium text-gray-500">Type</dt>

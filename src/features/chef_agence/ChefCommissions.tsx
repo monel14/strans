@@ -4,6 +4,7 @@ import { PageComponentProps, ChefAgence, Transaction, OperationType, Agent } fro
 import { Card } from '../../components/common/Card';
 import { Table } from '../../components/common/Table';
 import { formatAmount, formatDate } from '../../utils/formatters';
+import { formatShortId } from '../../utils/idFormatters';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
 import { useChefActions } from '../../hooks/useChefActions';
@@ -131,7 +132,7 @@ export const ChefCommissions: React.FC<PageComponentProps> = ({ user, refreshCur
     const headers = ['Date Op.', 'ID Op.', 'Type Op.', 'Montant Op.', 'Commission Générée'];
     const rows = personalTxs.map(t => [
         formatDate(t.created_at).split(' ')[0],
-        t.id.substring(0, 8) + '...',
+        formatShortId(t.id, 'transaction'),
         opTypes[t.op_type_id] || t.op_type_id,
         formatAmount(t.montant_principal),
         formatAmount(t.commission_generee)

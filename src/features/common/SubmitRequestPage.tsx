@@ -3,6 +3,7 @@ import { PageComponentProps, Request } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Pagination } from '../../components/common/Pagination';
 import { formatDate } from '../../utils/formatters';
+import { formatShortId } from '../../utils/idFormatters';
 import { getBadgeClass } from '../../utils/uiHelpers';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
@@ -28,7 +29,7 @@ const RequestHistoryCard: React.FC<{ request: Request; onAction: (action: string
                     <div>
                         <span className={`badge ${getBadgeClass(request.status)} mb-2`}>{request.status}</span>
                         <h4 className="font-bold text-gray-800 dark:text-gray-100">{request.sujet}</h4>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">ID: {request.id.substring(0,8)}... &bull; {formatDate(request.created_at)}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">ID: {formatShortId(request.id, 'request')} &bull; {formatDate(request.created_at)}</p>
                     </div>
                     <div className="flex items-center space-x-2">
                         {request.attachment_url && (

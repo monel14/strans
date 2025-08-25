@@ -4,6 +4,7 @@ import { Modal } from '../../components/common/Modal';
 import { SousAdmin } from '../../types';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
+import { formatShortId } from '../../utils/idFormatters';
 
 interface AssignTaskModalProps {
     isOpen: boolean;
@@ -46,7 +47,7 @@ export const AssignTaskModal: React.FC<AssignTaskModalProps> = ({ isOpen, onClos
     return (
         <Modal
             id="assign-task-modal"
-            title={`Assigner Tâche ${taskData.id.substring(0,8)}...`}
+            title={`Assigner Tâche ${formatShortId(taskData.id, taskData.type === 'transactions' ? 'transaction' : 'request')}`}
             isOpen={isOpen}
             onClose={onClose}
             icon={<i className="fas fa-user-plus text-xl"></i>}

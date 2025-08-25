@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { PageComponentProps, AuditLog, User } from '../../types';
 import { formatAmount, timeAgo } from '../../utils/formatters';
+import { formatShortId } from '../../utils/idFormatters';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
 
@@ -137,7 +138,7 @@ export const AdminGeneralDashboard: React.FC<PageComponentProps> = ({ navigateTo
 
                         const recentActivities: AuditLog[] = (auditRes.data as any[]).map(log => ({
                             timestamp: log.timestamp,
-                            user: log.user_id ? userMap[log.user_id] || "ID: " + log.user_id.substring(0,8) : "Système",
+                            user: log.user_id ? userMap[log.user_id] || formatShortId(log.user_id, 'profile') : "Système",
                             role: log.user_role || "N/A",
                             action: log.action,
                             entity: log.entity_id || log.entity_type || "Système",
@@ -185,7 +186,7 @@ export const AdminGeneralDashboard: React.FC<PageComponentProps> = ({ navigateTo
                                 title="Administration"
                                 description="Gérez les agences et les comptes sous-admin."
                                 icon="fa-users-cog"
-                                onClick={() => navigateTo('Administration')}}
+                                onClick={() => navigateTo('Administration')}
                                 colorGradient="from-blue-500 to-purple-500"
                             />
                              <ActionCard

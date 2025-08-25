@@ -4,6 +4,7 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
 import { Pagination } from '../../components/common/Pagination';
 import { formatDate, formatAmount } from '../../utils/formatters';
+import { formatShortId, IdDisplay } from '../../utils/idFormatters';
 import { getBadgeClass } from '../../utils/uiHelpers';
 import { supabase } from '../../supabaseClient';
 import { handleSupabaseError } from '../../utils/errorUtils';
@@ -461,7 +462,7 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                                                             {opType?.name || 'Type inconnu'}
                                                         </div>
                                                         <div className="text-xs text-gray-500">
-                                                            #{transaction.id.substring(0, 8)}...
+                                                            {formatShortId(transaction.id, 'transaction')}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -607,7 +608,15 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                         Êtes-vous sûr de vouloir valider cette transaction ?
                     </p>
                     <div className="mt-4 p-3 bg-gray-50 rounded-lg border">
-                        <div className="flex justify-between"><span>ID:</span> <strong>{itemToValidate.id}</strong></div>
+                        <div className="flex justify-between items-center">
+                            <span>ID:</span> 
+                            <IdDisplay 
+                                id={itemToValidate.id} 
+                                type="transaction"
+                                variant="date"
+                                date={new Date(itemToValidate.created_at)}
+                            />
+                        </div>
                         <div className="flex justify-between"><span>Montant:</span> <strong>{formatAmount(itemToValidate.montant_principal)}</strong></div>
                     </div>
                     <p className="mt-4 text-sm text-red-600 font-semibold">
