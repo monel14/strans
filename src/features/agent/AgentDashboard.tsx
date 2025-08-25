@@ -127,7 +127,7 @@ export const AgentDashboard: React.FC<PageComponentProps> = ({ user, navigateTo,
     return (
         <>
             <PageHeader 
-                title={`Tableau de Bord, ${user.name}`}
+                title={`Accueil, ${user.name}`}
                 subtitle="Bienvenue sur votre espace personnel. Gérez vos opérations et suivez vos performances."
                 icon="fa-chart-pie"
                 gradient="from-blue-600 to-cyan-600"

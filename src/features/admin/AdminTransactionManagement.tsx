@@ -243,7 +243,7 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
     return (
         <>
             <PageHeader
-                title="Gestion des Transactions"
+                title="Validations"
                 subtitle="Centre unifié pour la validation et l'historique des transactions"
                 icon="fa-cogs"
                 gradient="from-blue-500 to-purple-600"
@@ -428,7 +428,7 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                     </div>
                 ) : (
                     <>
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {paginatedTransactions.map(transaction => {
                                 const opType = opTypes[transaction.op_type_id];
                                 const agent = users[transaction.agent_id];
@@ -437,8 +437,8 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                                 const validator = transaction.validateur_id ? users[transaction.validateur_id] : null;
                                 
                                 return (
-                                    <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                                        <div className={`px-4 py-3 border-l-4 ${
+                                    <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                        <div className={`px-3 py-2 border-l-4 ${
                                             transaction.status === 'Validé' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' :
                                             transaction.status === 'Rejeté' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' :
                                             !transaction.assigned_to ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : 
@@ -446,8 +446,8 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                                             'border-gray-500 bg-gray-50 dark:bg-gray-900/20'
                                         }`}>
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                <div className="flex items-center space-x-2">
+                                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                                                         transaction.status === 'Validé' ? 'bg-green-100 text-green-600' :
                                                         transaction.status === 'Rejeté' ? 'bg-red-100 text-red-600' :
                                                         !transaction.assigned_to ? 'bg-orange-100 text-orange-600' : 
@@ -456,8 +456,8 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                                                     }`}>
                                                         <i className={`fas ${getOperationIcon(transaction.op_type_id)} text-xs`}></i>
                                                     </div>
-                                                    <div>
-                                                        <div className="font-semibold text-gray-900 dark:text-gray-100">
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
                                                             {opType?.name || 'Type inconnu'}
                                                         </div>
                                                         <div className="text-xs text-gray-500">
@@ -470,69 +470,69 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                                                     {transaction.status === 'Rejeté' && <i className="fas fa-times-circle mr-1"></i>}
                                                     {(transaction.status === 'En attente de validation' || transaction.status === 'en_attente_validation') && <i className="fas fa-clock mr-1"></i>}
                                                     {(transaction.status === 'Assignée (validation en cours)' || transaction.status === 'assigné_validation_en_cours') && <i className="fas fa-user-check mr-1"></i>}
-                                                    {transaction.status}
+                                                    {transaction.status.length > 8 ? transaction.status.substring(0, 8) + '...' : transaction.status}
                                                 </span>
                                             </div>
                                             {(assignedUser || validator) && (
-                                                <div className="mt-2 text-xs text-gray-600 dark:text-gray-300">
+                                                <div className="mt-1 text-xs text-gray-600 dark:text-gray-300 truncate">
                                                     {assignedUser && `Assigné à: ${assignedUser.name}`}
                                                     {validator && ` • Validé par: ${validator.name}`}
                                                 </div>
                                             )}
                                         </div>
                                         
-                                        <div className="px-4 py-3">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                        <div className="px-3 py-2">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
                                                     {formatAmount(transaction.montant_principal)}
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="text-sm text-gray-500">
-                                                        {formatDate(transaction.created_at)}
+                                                    <div className="text-xs text-gray-500">
+                                                        {formatDate(transaction.created_at).split(' ')[0]}
                                                     </div>
-                                                    <div className="text-xs text-gray-400">
+                                                    <div className="text-xs text-gray-400 truncate max-w-24">
                                                         {agent?.name} • {agency?.name}
                                                     </div>
                                                 </div>
                                             </div>
                                             
-                                            {/* Actions selon le mode et le statut */}
-                                            <div className="flex flex-wrap gap-2">
+                                            {/* Actions selon le mode et le statut - Version compacte */}
+                                            <div className="flex flex-wrap gap-1">
                                                 {mainTab === 'validation' && (
                                                     transaction.assigned_to === user.id ? (
                                                         <>
                                                             <button
                                                                 onClick={() => handleTransactionAction('validate', transaction)}
-                                                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition-colors text-sm"
+                                                                className="flex-1 inline-flex items-center justify-center px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs"
                                                             >
                                                                 <i className="fas fa-check mr-1"></i>
                                                                 Valider
                                                             </button>
                                                             <button
                                                                 onClick={() => handleTransactionAction('reject', transaction)}
-                                                                className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors text-sm"
+                                                                className="flex-1 inline-flex items-center justify-center px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded text-xs"
                                                             >
                                                                 <i className="fas fa-times mr-1"></i>
                                                                 Rejeter
                                                             </button>
                                                             <button
                                                                 onClick={() => handleTransactionAction('unassign', transaction)}
-                                                                className="inline-flex items-center px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors text-sm"
+                                                                className="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs"
+                                                                title="Se désassigner"
                                                             >
-                                                                <i className="fas fa-user-minus mr-1"></i>
-                                                                Se désassigner
+                                                                <i className="fas fa-user-minus"></i>
                                                             </button>
                                                         </>
                                                     ) : !transaction.assigned_to ? (
                                                         <button
                                                             onClick={() => handleTransactionAction('assign-self', transaction)}
-                                                            className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors text-sm"
+                                                            className="flex-1 inline-flex items-center justify-center px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs"
                                                         >
                                                             <i className="fas fa-user-plus mr-1"></i>
                                                             S'assigner
                                                         </button>
                                                     ) : (
-                                                        <div className="text-sm text-gray-500 italic">
+                                                        <div className="text-xs text-gray-500 italic truncate">
                                                             Assigné à {assignedUser?.name}
                                                         </div>
                                                     )
@@ -541,19 +541,19 @@ export const AdminTransactionManagement: React.FC<PageComponentProps> = ({ user,
                                                 {transaction.proof_url && (
                                                     <button
                                                         onClick={() => openModal('viewProof', transaction.proof_url)}
-                                                        className="inline-flex items-center px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors text-sm"
+                                                        className="inline-flex items-center px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs"
+                                                        title="Voir la preuve"
                                                     >
-                                                        <i className="fas fa-eye mr-1"></i>
-                                                        Preuve
+                                                        <i className="fas fa-eye"></i>
                                                     </button>
                                                 )}
-
-                                                {transaction.motif_rejet && (
-                                                    <div className="w-full mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-sm text-red-700 dark:text-red-300">
-                                                        <strong>Motif du rejet:</strong> {transaction.motif_rejet}
-                                                    </div>
-                                                )}
                                             </div>
+                                            
+                                            {transaction.motif_rejet && (
+                                                <div className="w-full mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-700 dark:text-red-300">
+                                                    <strong>Motif:</strong> {transaction.motif_rejet.length > 50 ? transaction.motif_rejet.substring(0, 50) + '...' : transaction.motif_rejet}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );

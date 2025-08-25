@@ -30,26 +30,26 @@ import { SubmitRequestPage } from '../features/common/SubmitRequestPage';
 
 export const navigationLinks: { [role: string]: NavLink[] } = {
     agent: [
-        { key: 'Tableau de Bord', label: 'Tableau de Bord', icon: 'fa-chart-pie', component: AgentDashboard },
+        { key: 'Accueil', label: 'Accueil', icon: 'fa-chart-pie', component: AgentDashboard },
         { key: 'Opérations', label: 'Opérations', icon: 'fa-exchange-alt', component: AgentTransactionHistory },
         { key: 'Requêtes', label: 'Requêtes', icon: 'fa-headset', component: SubmitRequestPage },
     ],
     chef_agence: [
-        { key: 'Tableau de Bord', label: 'Tableau de Bord', icon: 'fa-chart-line', component: ChefAgenceDashboard },
-        { key: 'Gestion des Agents', label: 'Gestion des Agents', icon: 'fa-users-cog', component: ChefManageAgents },
+        { key: 'Accueil', label: 'Accueil', icon: 'fa-chart-line', component: ChefAgenceDashboard },
+        { key: 'Équipe', label: 'Équipe', icon: 'fa-users-cog', component: ChefManageAgents },
         { key: 'Historique Agence', label: 'Historique Agence', icon: 'fa-landmark', component: ChefAgenceHistory },
         { key: 'Mes Commissions', label: 'Mes Commissions', icon: 'fa-percent', component: ChefCommissions },
         { key: 'Mes Requêtes', label: 'Mes Requêtes', icon: 'fa-headset', component: SubmitRequestPage },
     ],
     admin_general: [
-        { key: 'Tableau de Bord Global', label: 'Tableau de Bord Global', icon: 'fa-globe-americas', component: AdminGeneralDashboard },
-        { key: 'Gestion des Transactions', label: 'Gestion des Transactions', icon: 'fa-cogs', component: AdminTransactionManagement },
-        { key: 'Gestion des Requêtes', label: 'Gestion des Requêtes', icon: 'fa-headset', component: AdminRequestManagement },
-        { key: 'Gestion & Administration', label: 'Gestion & Admin', icon: 'fa-users-cog', component: AdminManagementPage },
+        { key: 'Accueil Global', label: 'Accueil Global', icon: 'fa-globe-americas', component: AdminGeneralDashboard },
+        { key: 'Validations', label: 'Validations', icon: 'fa-cogs', component: AdminTransactionManagement },
+        { key: 'Support', label: 'Support', icon: 'fa-headset', component: AdminRequestManagement },
+        { key: 'Administration', label: 'Administration', icon: 'fa-users-cog', component: AdminManagementPage },
     ],
     sous_admin: [
-        { key: 'Gestion des Transactions', label: 'Gestion des Transactions', icon: 'fa-check-square', component: SousAdminTransactionManagement },
-        { key: 'Gestion des Requêtes', label: 'Gestion des Requêtes', icon: 'fa-headset', component: SousAdminRequestManagement },
+        { key: 'Validations', label: 'Validations', icon: 'fa-check-square', component: SousAdminTransactionManagement },
+        { key: 'Support', label: 'Support', icon: 'fa-headset', component: SousAdminRequestManagement },
     ],
     developpeur: [
         { key: 'Dashboard Technique', label: 'Dashboard Technique', icon: 'fa-server', component: DevDashboard },

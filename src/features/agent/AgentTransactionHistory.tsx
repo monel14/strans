@@ -362,21 +362,21 @@ export const AgentTransactionHistory: React.FC<PageComponentProps> = ({ user, op
                                 </table>
                             </div>
 
-                            {/* Version Mobile - Cartes améliorées */}
-                            <div className="lg:hidden space-y-4">
+                            {/* Version Mobile - Cartes améliorées compactes */}
+                            <div className="lg:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {paginatedTransactions.map(transaction => {
                                     const opType = availableOpTypes.find(ot => ot.id === transaction.op_type_id);
                                     return (
-                                        <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                        <div key={transaction.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                                             {/* Header de la carte */}
-                                            <div className={`px-4 py-3 border-l-4 ${transaction.status === 'validé' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : transaction.status === 'rejeté' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'}`}>
+                                            <div className={`px-3 py-2 border-l-4 ${transaction.status === 'validé' ? 'border-green-500 bg-green-50 dark:bg-green-900/20' : transaction.status === 'rejeté' ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'}`}>
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${transaction.status === 'validé' ? 'bg-green-100 text-green-600' : transaction.status === 'rejeté' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'}`}>
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${transaction.status === 'validé' ? 'bg-green-100 text-green-600' : transaction.status === 'rejeté' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600'}`}>
                                                             <i className={`fas ${getOperationIcon(transaction.op_type_id)} text-xs`}></i>
                                                         </div>
-                                                        <div>
-                                                            <div className="font-semibold text-gray-900 dark:text-gray-100">
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
                                                                 {opType?.name || 'Type inconnu'}
                                                             </div>
                                                             <div className="text-xs text-gray-500">
@@ -394,14 +394,14 @@ export const AgentTransactionHistory: React.FC<PageComponentProps> = ({ user, op
                                             </div>
 
                                             {/* Contenu de la carte */}
-                                            <div className="px-4 py-3">
-                                                <div className="flex items-center justify-between mb-3">
-                                                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                            <div className="px-3 py-2">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
                                                         {formatAmount(transaction.montant_principal)}
                                                     </div>
                                                     <div className="text-right">
-                                                        <div className="text-sm text-gray-500">
-                                                            {formatDate(transaction.created_at)}
+                                                        <div className="text-xs text-gray-500">
+                                                            {formatDate(transaction.created_at).split(' ')[0]}
                                                         </div>
                                                         {transaction.frais > 0 && (
                                                             <div className="text-xs text-gray-400">
@@ -415,10 +415,11 @@ export const AgentTransactionHistory: React.FC<PageComponentProps> = ({ user, op
                                                     <div className="flex justify-end">
                                                         <button
                                                             onClick={() => openModal('viewProof', transaction.proof_url)}
-                                                            className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md transition-colors text-sm"
+                                                            className="inline-flex items-center px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-xs"
+                                                            title="Voir la preuve"
                                                         >
                                                             <i className="fas fa-eye mr-1"></i>
-                                                            Voir la preuve
+                                                            Preuve
                                                         </button>
                                                     </div>
                                                 )}

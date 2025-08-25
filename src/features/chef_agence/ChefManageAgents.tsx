@@ -159,11 +159,11 @@ export const ChefManageAgents: React.FC<PageComponentProps> = ({ user, refreshCu
     const processedRechargeRequests = useMemo(() => rechargeRequests.filter(r => !['En attente', 'en attente'].includes(r.status)), [rechargeRequests]);
 
     if (agentsLoading || rechargeLoading) return <div>Chargement de la gestion des agents...</div>;
-    if (!chefUser.agency_id) return <Card title="Gestion des Agents" icon="fa-users-cog"><p>Vous n'êtes assigné à aucune agence.</p></Card>;
+    if (!chefUser.agency_id) return <Card title="Équipe" icon="fa-users-cog"><p>Vous n'êtes assigné à aucune agence.</p></Card>;
 
     return (
         <>
-            <PageHeader title="Gestion des Agents" subtitle="Supervisez les comptes, les soldes et les demandes de vos agents." icon="fa-users-cog" gradient="from-green-500 to-teal-500" />
+            <PageHeader title="Équipe" subtitle="Supervisez les comptes, les soldes et les demandes de vos agents." icon="fa-users-cog" gradient="from-green-500 to-teal-500" />
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <StatCard title="Nombre d'Agents" value={`${agentStats.activeAgents} / ${agents.length}`} icon="fa-users" color="border-blue-500" />

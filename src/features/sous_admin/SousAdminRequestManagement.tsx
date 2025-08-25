@@ -269,7 +269,7 @@ export const SousAdminRequestManagement: React.FC<SousAdminRequestManagementProp
     return (
         <>
             <PageHeader
-                title="Gestion des Requêtes"
+                title="Support"
                 subtitle="Centre unifié pour la gestion et l'historique des requêtes (Sous-Admin)"
                 icon="fa-headset"
                 gradient="from-purple-500 to-pink-600"

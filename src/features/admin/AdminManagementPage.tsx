@@ -9,11 +9,10 @@ import { AgencyManagementView } from './AgencyManagementView';
 import { AdminConfigCommissions } from './AdminConfigCommissions';
 import { AdminAuditLog } from './AdminAuditLog';
 import { AdminManageSubAdmins } from './AdminManageSubAdmins';
-import { StorageSetup } from './StorageSetup';
 import { PageLoader } from '../../components/common/Loader';
 
 
-type MainTabKey = 'agencies' | 'subadmins' | 'users' | 'system' | 'operations' | 'logs';
+type MainTabKey = 'agencies' | 'subadmins' | 'users' | 'operations' | 'logs';
 type SortField = 'name' | 'email' | 'created_at' | 'status';
 type SortOrder = 'asc' | 'desc';
 
@@ -144,8 +143,8 @@ export const AdminManagementPage: React.FC<PageComponentProps> = (props) => {
     return (
         <>
             <PageHeader
-                title="Gestion & Administration"
-                subtitle="Centre de contrôle pour la gestion des agences, utilisateurs et système"
+                title="Administration"
+                subtitle="Centre de contrôle pour la gestion des agences, utilisateurs et opérations"
                 icon="fa-users-cog"
                 gradient="from-purple-500 to-pink-600"
             />
@@ -181,7 +180,6 @@ export const AdminManagementPage: React.FC<PageComponentProps> = (props) => {
                 <button onClick={() => setActiveTab('operations')} className={activeTab === 'operations' ? 'active' : ''}><i className="fas fa-cogs mr-2"></i>Opérations</button>
                 <button onClick={() => setActiveTab('subadmins')} className={activeTab === 'subadmins' ? 'active' : ''}><i className="fas fa-user-shield mr-2"></i>Sous-Admins ({subAdmins.length})</button>
                 <button onClick={() => setActiveTab('users')} className={activeTab === 'users' ? 'active' : ''}><i className="fas fa-users mr-2"></i>Utilisateurs ({users.length})</button>
-                <button onClick={() => setActiveTab('system')} className={activeTab === 'system' ? 'active' : ''}><i className="fas fa-server mr-2"></i>Système</button>
                 <button onClick={() => setActiveTab('logs')} className={activeTab === 'logs' ? 'active' : ''}><i className="fas fa-history mr-2"></i>Journal d'Audit</button>
             </div>
 
@@ -363,64 +361,6 @@ export const AdminManagementPage: React.FC<PageComponentProps> = (props) => {
                             </div>
                         )}
                     </Card>
-                )}
-
-                {activeTab === 'system' && (
-                    <div className="space-y-6">
-                        <Card title="Vue d'ensemble du Système" icon="fa-server">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white">
-                                    <div className="flex items-center">
-                                        <div className="p-3 bg-white/20 rounded-full mr-3">
-                                            <i className="fas fa-check-circle text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm opacity-90">Statut Système</p>
-                                            <p className="text-2xl font-bold">Opérationnel</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-                                    <div className="flex items-center">
-                                        <div className="p-3 bg-white/20 rounded-full mr-3">
-                                            <i className="fas fa-database text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm opacity-90">Base de Données</p>
-                                            <p className="text-2xl font-bold">Connectée</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white">
-                                    <div className="flex items-center">
-                                        <div className="p-3 bg-white/20 rounded-full mr-3">
-                                            <i className="fas fa-cloud text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm opacity-90">Stockage</p>
-                                            <p className="text-2xl font-bold">Actif</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white">
-                                    <div className="flex items-center">
-                                        <div className="p-3 bg-white/20 rounded-full mr-3">
-                                            <i className="fas fa-shield-alt text-xl"></i>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm opacity-90">Sécurité</p>
-                                            <p className="text-2xl font-bold">Sécurisé</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
-
-                        <StorageSetup />
-                    </div>
                 )}
             </div>
 

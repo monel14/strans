@@ -268,7 +268,7 @@ export const AdminRequestManagement: React.FC<PageComponentProps> = ({ user, ref
     return (
         <>
             <PageHeader
-                title="Gestion des Requêtes"
+                title="Support"
                 subtitle="Centre unifié pour la gestion et l'historique des requêtes utilisateurs"
                 icon="fa-headset"
                 gradient="from-indigo-500 to-purple-600"

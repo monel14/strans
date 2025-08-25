@@ -10,26 +10,26 @@ interface BottomNavProps {
 
 const navLinksConfig: { [role: string]: { key: string, label: string, icon: string }[] } = {
     agent: [
-        { key: 'Tableau de Bord', label: 'Dashboard', icon: 'fa-chart-pie' },
+        { key: 'Accueil', label: 'Accueil', icon: 'fa-chart-pie' },
         { key: 'Opérations', label: 'Opérations', icon: 'fa-exchange-alt' },
         { key: 'Requêtes', label: 'Requêtes', icon: 'fa-headset' },
     ],
     chef_agence: [
-        { key: 'Tableau de Bord', label: 'Dashboard', icon: 'fa-chart-line' },
-        { key: 'Gestion des Agents', label: 'Agents', icon: 'fa-users-cog' },
+        { key: 'Accueil', label: 'Accueil', icon: 'fa-chart-line' },
+        { key: 'Équipe', label: 'Équipe', icon: 'fa-users-cog' },
         { key: 'Historique Agence', label: 'Historique', icon: 'fa-landmark' },
         { key: 'Mes Commissions', label: 'Commissions', icon: 'fa-percent' },
         { key: 'Mes Requêtes', label: 'Requêtes', icon: 'fa-headset' },
     ],
     admin_general: [
-        { key: 'Tableau de Bord Global', label: 'Dashboard', icon: 'fa-globe-americas' },
-        { key: 'Gestion des Transactions', label: 'Validations', icon: 'fa-cogs' },
-        { key: 'Gestion & Administration', label: 'Gestion', icon: 'fa-users-cog' },
-        { key: 'Gestion des Requêtes', label: 'Requêtes', icon: 'fa-envelope-open-text' },
+        { key: 'Accueil Global', label: 'Accueil', icon: 'fa-globe-americas' },
+        { key: 'Validations', label: 'Validations', icon: 'fa-cogs' },
+        { key: 'Administration', label: 'Admin', icon: 'fa-users-cog' },
+        { key: 'Support', label: 'Support', icon: 'fa-envelope-open-text' },
     ],
     sous_admin: [
-        { key: 'Gestion des Transactions', label: 'Validations', icon: 'fa-check-square' },
-        { key: 'Gestion des Requêtes', label: 'Requêtes', icon: 'fa-headset' },
+        { key: 'Validations', label: 'Validations', icon: 'fa-check-square' },
+        { key: 'Support', label: 'Support', icon: 'fa-headset' },
     ],
     developpeur: [
         { key: 'Dashboard Technique', label: 'Dashboard', icon: 'fa-server' },

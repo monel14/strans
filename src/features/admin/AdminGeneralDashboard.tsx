@@ -160,7 +160,7 @@ export const AdminGeneralDashboard: React.FC<PageComponentProps> = ({ navigateTo
     return (
         <>
             <PageHeader
-                title="Tableau de Bord Global"
+                title="Accueil  "
                 subtitle="Vue d'ensemble de la performance et des opérations de la plateforme."
                 icon="fa-globe-americas"
                 gradient="from-purple-600 to-indigo-600"
@@ -182,10 +182,10 @@ export const AdminGeneralDashboard: React.FC<PageComponentProps> = ({ navigateTo
                     <Card title="Accès Rapides" icon="fa-bolt">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <ActionCard
-                                title="Gestion & Administration"
+                                title="Administration"
                                 description="Gérez les agences et les comptes sous-admin."
                                 icon="fa-users-cog"
-                                onClick={() => navigateTo('Gestion & Administration')}
+                                onClick={() => navigateTo('Administration')}}
                                 colorGradient="from-blue-500 to-purple-500"
                             />
                              <ActionCard

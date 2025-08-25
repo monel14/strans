@@ -159,7 +159,7 @@ export const ChefAgenceDashboard: React.FC<PageComponentProps> = ({ user, naviga
     return (
         <>
             <PageHeader
-                title={`Tableau de Bord, ${user.name}`}
+                title={`Accueil, ${user.name}`}
                 subtitle="Vue d'ensemble de votre activité et de celle de votre agence."
                 icon="fa-chart-line"
                 gradient="from-blue-600 to-cyan-600"
@@ -215,7 +215,7 @@ export const ChefAgenceDashboard: React.FC<PageComponentProps> = ({ user, naviga
                     <Card title="Actions Rapides" icon="fa-bolt">
                         <div className="space-y-3">
                              <ActionCard title="Initier une Opération" description="Effectuez un transfert, payez une facture, etc." icon="fa-paper-plane" onClick={openNewOperationModal} colorGradient="from-blue-500 to-purple-500"/>
-                             <ActionCard title="Approuver les Recharges" description="Validez les demandes de vos agents." icon="fa-check-double" onClick={() => navigateTo('Gestion des Agents')} colorGradient="from-orange-500 to-yellow-500"/>
+                             <ActionCard title="Approuver les Recharges" description="Validez les demandes de vos agents." icon="fa-check-double" onClick={() => navigateTo('Équipe')} colorGradient="from-orange-500 to-yellow-500"/>
                              <ActionCard title="Recharger mon Solde" description="Créditez votre propre compte." icon="fa-funnel-dollar" onClick={openSelfRechargeModal} colorGradient="from-green-500 to-teal-500"/>
                         </div>
                     </Card>
