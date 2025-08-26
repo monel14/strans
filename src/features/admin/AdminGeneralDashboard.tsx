@@ -189,13 +189,6 @@ export const AdminGeneralDashboard: React.FC<PageComponentProps> = ({ navigateTo
                                 onClick={() => navigateTo('Administration')}
                                 colorGradient="from-blue-500 to-purple-500"
                             />
-                             <ActionCard
-                                title="Configuration & Outils"
-                                description="Configurez les commissions, services et auditez le système."
-                                icon="fa-tools"
-                                onClick={() => navigateTo('Configuration & Outils')}
-                                colorGradient="from-teal-500 to-green-500"
-                            />
                         </div>
                     </Card>
                 </div>

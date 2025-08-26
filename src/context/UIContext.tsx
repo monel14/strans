@@ -29,10 +29,47 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const toggleTheme = () => { /* No-op, dark mode removed */ };
 
     useEffect(() => {
-        // Force light theme
-        document.documentElement.classList.add('light');
-        document.documentElement.classList.remove('dark');
+        // Force light theme - Solution robuste pour mobile
+        const forceTheme = () => {
+            document.documentElement.classList.add('light');
+            document.documentElement.classList.remove('dark');
+            
+            // Force le color-scheme pour les navigateurs mobiles
+            document.documentElement.style.colorScheme = 'light';
+            document.body.style.colorScheme = 'light';
+        };
+        
+        // Application initiale
+        forceTheme();
+        
+        // Observateur pour détecter les changements de classe sur mobile
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const target = mutation.target as HTMLElement;
+                    if (target === document.documentElement && target.classList.contains('dark')) {
+                        // Supprime immédiatement la classe dark si elle est ajoutée
+                        setTimeout(() => forceTheme(), 0);
+                    }
+                }
+            });
+        });
+        
+        // Surveille les changements sur l'élément racine
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class', 'style']
+        });
+        
+        // Vérification périodique pour les cas edge sur mobile
+        const intervalId = setInterval(forceTheme, 1000);
+        
         localStorage.removeItem('theme'); // Clean up old setting
+        
+        return () => {
+            observer.disconnect();
+            clearInterval(intervalId);
+        };
     }, []);
     
     useEffect(() => {

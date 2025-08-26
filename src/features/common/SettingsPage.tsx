@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PageComponentProps } from '../../types';
 import { Card } from '../../components/common/Card';
 import { ToggleSwitch } from '../../components/common/ToggleSwitch';
-import PushNotificationTest from '../../components/notifications/PushNotificationTest';
+import { PushNotificationTest } from '../../components/notifications/PushNotificationTest.tsx';
 
 interface SettingsPageProps extends PageComponentProps {
     notificationSettings: { email: boolean; inApp: boolean };
